@@ -17811,6 +17811,7 @@ Polymer.AppLocalizeBehavior = {
 				text-align: left;
 				padding: var(--qio-confined-padding);
 				white-space: nowrap;
+        box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
 			}
 			:host button > iron-icon {
 				margin-right: var(--qio-standard-space);
@@ -17890,47 +17891,35 @@ Polymer.AppLocalizeBehavior = {
 			}
 			:host, :host ::slotted(*) {font-family: var(--qio-font-main);}
 			:host(.disabled) {
-				background-color: var(--qio-disabled-color);
 				color: var(--qio-disabled-color-inverted);
 				cursor: not-allowed;
 			}
-			:host(.highlight) {
+			:host(.highlight) > iron-icon {
 				color: var(--qio-secondary-color);
 			}
-			:host(.highlight.inverted) {
-				background-color: var(--qio-secondary-color);
-				color: var(--qio-secondary-color-inverted);
-			}
-			:host(.error) {
+			:host(.error) > iron-icon {
 				color: var(--qio-error-color);
 			}
-			:host(.error.inverted) {
-				background-color: var(--qio-error-color);
-				color: var(--qio-error-color-inverted);
-			}
-			:host(.ok) {
+			:host(.ok) > iron-icon {
 				color: var(--qio-ok-color);
 			}
-			:host(.ok.inverted) {
-				background-color: var(--qio-ok-color);
-				color: var(--qio-ok-color-inverted);
-			}
-			:host(.warning) {
+			:host(.warning) > iron-icon {
 				color: var(--qio-warning-color);
 			}
-			:host(.warning.inverted) {
-				background-color: var(--qio-warning-color);
-				color: var(--qio-warning-color-inverted);
-			}
-		</style>
+    </style>
+    <template is="dom-if" if="[[isWarning]]"><iron-icon icon="icons:warning"></iron-icon></template>
+    <template is="dom-if" if="[[!isWarning]]"><iron-icon icon="icons:error"></iron-icon></template>
 		<template is="dom-if" if="[[noLocalize]]"><slot></slot></template>
-		<template is="dom-if" if="[[!noLocalize]]"><qio-localize><slot></slot></qio-localize></template>
+    <template is="dom-if" if="[[!noLocalize]]"><qio-localize><slot></slot></qio-localize></template>
 	</template>
 	<script>
 (function() {
 	class Component extends Polymer.Element {
 		static get is() {return 'qio-flagged-text';}
-		static get properties() {return {noLocalize:{type:Boolean, value:false}};}
+		static get properties() {return {
+      noLocalize:{type:Boolean, value:false},
+      isWarning:{type:Boolean, value:false}
+    };}
 	}
 	window.customElements.define(Component.is, Component);
 })();
@@ -21692,6 +21681,7 @@ element.
 				flex-direction: column;
 				padding: var(--qio-standard-padding) var(--qio-double-padding);
 				flex: 1;
+        box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
 			}
 
 			@media (max-width: 780px) {
@@ -21710,7 +21700,6 @@ element.
 			}
 			:host .info qio-flagged-text.withWarnings {
 				cursor: pointer;
-				text-decoration: underline;
 			}
 			:host .info > div + div > label            {flex: 1 1;}
 			:host .info > div + div > qio-flagged-text {flex: 0 0 2.5rem;}
@@ -21756,36 +21745,30 @@ element.
 			<qio-main-title>[[mainTitle]]</qio-main-title>
 			<div class="info">
 				<qio-sub-title>[[lastUploadTitle]]</qio-sub-title>
-				<div>
+				<div title="When the previous file was uploaded">
 					<iron-icon icon="icons:schedule"></iron-icon>
-					<qio-date-time>[[lastUploadTime]]</qio-date-time>
-				</div>
+					<qio-date-time aria-labelledby="Previous File Upload Time">[[lastUploadTime]]</qio-date-time>
+        </div>
+        <div>
+          <qio-flagged-text aria-label="Previous File Warning Count" title="Number of upload warnings for the previous file" is-warning="true" no-localize="" on-click="_showWarnings" warning="lastUploadWarnings" heading="File Warnings" class$="warning [[_hasWarnings(lastUploadWarnings.length)]]">[[lastUploadWarnings.length]]</qio-flagged-text>
+          <qio-flagged-text aria-label="Previous File Error Count" title="Number of upload errors for the previous file" no-localize="" on-click="_showWarnings" warning="lastUploadErrors" heading="File Errors" class$="error [[_hasWarnings(lastUploadErrors.length)]]">[[lastUploadErrors.length]]</qio-flagged-text>
+        </div>
 			</div>
-			<qio-button on-click="_acceptSap" icon="cloud-upload" class$="[[_acceptButtonClass(commissionable)]]">Accept</qio-button>
 			<div class="info">
-				<qio-sub-title>[[thisUploadTitle]]</qio-sub-title>
-				<div>
-					<iron-icon icon="icons:schedule"></iron-icon>
-					<qio-date-time>[[thisUploadTime]]</qio-date-time>
+        <qio-sub-title>[[thisUploadTitle]]</qio-sub-title>
+				<div title="When the current file was uploaded">
+          <iron-icon icon="icons:schedule"></iron-icon>
+					<qio-date-time aria-labelledby="Current File Upload Time">[[thisUploadTime]]</qio-date-time>
 				</div>
 				<div>
-					<label>
-						<iron-icon icon="icons:warning"></iron-icon>
-						<qio-localize>This:</qio-localize>
-					</label>
-					<qio-flagged-text on-click="_showWarnings" warning="thisUploadWarnings" no-localize="" heading="File Warnings" class$="warning [[_hasWarnings(thisUploadWarnings.length)]] [[_deltaGtOneTenth(thisUploadWarnings.length, lastUploadWarnings.length)]]">[[thisUploadWarnings.length]]</qio-flagged-text>
-					<qio-flagged-text no-localize="" on-click="_showWarnings" warning="thisUploadErrors" heading="File Errors" class$="error [[_hasWarnings(thisUploadErrors.length)]] [[_deltaGtOneTenth(thisUploadErrors.length, lastUploadErrors.length)]]">[[thisUploadErrors.length]]</qio-flagged-text>
+          <qio-flagged-text aria-label="Current File Warning Count" title="Number of upload warnings for this file" is-warning="true" on-click="_showWarnings" warning="thisUploadWarnings" no-localize="" heading="File Warnings" class$="warning [[_hasWarnings(thisUploadWarnings.length)]] [[_deltaGtOneTenth(thisUploadWarnings.length, lastUploadWarnings.length)]]">[[thisUploadWarnings.length]]</qio-flagged-text>
+					<qio-flagged-text aria-label="Current File Error Count" title="Number of upload errors for this file" no-localize="" on-click="_showWarnings" warning="thisUploadErrors" heading="File Errors" class$="error [[_hasWarnings(thisUploadErrors.length)]] [[_deltaGtOneTenth(thisUploadErrors.length, lastUploadErrors.length)]]">[[thisUploadErrors.length]]</qio-flagged-text>
 				</div>
-				<div>
-					<label>
-						<iron-icon icon="icons:warning"></iron-icon>
-						<qio-localize>Previous:</qio-localize>
-					</label>
-					<qio-flagged-text no-localize="" on-click="_showWarnings" warning="lastUploadWarnings" heading="File Warnings" class$="warning [[_hasWarnings(lastUploadWarnings.length)]]">[[lastUploadWarnings.length]]</qio-flagged-text>
-					<qio-flagged-text no-localize="" on-click="_showWarnings" warning="lastUploadErrors" heading="File Errors" class$="error [[_hasWarnings(lastUploadErrors.length)]]">[[lastUploadErrors.length]]</qio-flagged-text>
-				</div>
-			</div>
-			<qio-dialog-open-button dialog="upload" icon="file-upload">Upload</qio-dialog-open-button>
+      </div>
+      <div>
+        <qio-dialog-open-button title="Upload a new file" dialog="upload" icon="file-upload">Upload</qio-dialog-open-button>
+        <qio-button title="Accept the uploaded file" on-click="_acceptSap" icon="cloud-upload" class$="[[_acceptButtonClass(commissionable)]]">Accept</qio-button>
+      </div>
 		</qio-box>
 
 		<qio-dialog id="upload">
