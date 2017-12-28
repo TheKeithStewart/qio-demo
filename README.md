@@ -1,6 +1,20 @@
 # QIO Demo
 
+## Install Dependencies
+
+```bash
+npm install
+```
+
+## Running Application
+
+```bash
+npm start
+```
+
 ## Browser Compatiblity Issues
+
+This demo currently works file in Chrome, FireFox, Edge, and Safari. It is not working in IE. However, the key to making it work in IE seems to be with getting the `custom-elements-es5-adapter.js` polyfill to work correctly with this build. More info about this can be found at https://www.polymer-project.org/2.0/docs/polyfills.
 
 ## UX Design
 
